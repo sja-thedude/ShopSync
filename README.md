@@ -8,6 +8,10 @@ Syncing products between Shopify and your app, with a shopping cart and checkout
 	•	Persistent cart using Pinia.
 	•	Fixed header with cart dropdown.
 
+## Demo
+
+[Live Link](https://www.loom.com/share/002a27e753a14d27ae32ae26d4e94dea?sid=9a05a816-e457-456a-a8e5-980ba0c05cae)
+
 ## Requirements
 	•	PHP >= 8.1
 	•	Composer
