@@ -18,6 +18,8 @@ Syncing products between Shopify and your app, with a shopping cart and checkout
 	•	Node.js >= 18
 	•	NPM/Yarn
 	•	Laravel 10
+	•	blade
+	•	Vue
 	•	MySQL or any supported database (optional, for persistence)
 
 ## Environment Variables
