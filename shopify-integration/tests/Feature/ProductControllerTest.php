@@ -1,72 +1,51 @@
 <?php
 
-namespace Tests\Feature;
+namespace App\Http\Controllers;
 
-use Tests\TestCase;
+use Illuminate\Http\Request;
 use App\Services\ShopifyService;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class ProductControllerTest extends TestCase
+class ProductController extends Controller
 {
-    use RefreshDatabase;
+    protected $shopify;
 
-    public function test_products_index_page_loads()
+    public function __construct(ShopifyService $shopify)
     {
-        // Mock ShopifyService for index
-        $this->mock(ShopifyService::class, function ($mock) {
-            $mock->shouldReceive('getProducts')
-                 ->once()
-                 ->andReturn([
-                     [
-                         'id' => 1,
-                         'title' => 'Test Product 1',
-                         'body_html' => 'Description 1',
-                         'variants' => [['price' => 9.99]],
-                         'image' => ['src' => 'https://example.com/image1.jpg'],
-                         'vendor' => 'Vendor 1',
-                     ],
-                     [
-                         'id' => 2,
-                         'title' => 'Test Product 2',
-                         'body_html' => 'Description 2',
-                         'variants' => [['price' => 19.99]],
-                         'image' => ['src' => 'https://example.com/image2.jpg'],
-                         'vendor' => 'Vendor 2',
-                     ],
-                 ]);
-        });
-
-        $response = $this->get('/products');
-
-        $response->assertStatus(200);
-        $response->assertSee('Test Product 1');
-        $response->assertSee('Test Product 2');
+        $this->shopify = $shopify;
     }
 
-    public function test_single_product_page_loads()
+    public function index()
     {
-        $testId = 12345;
+        $products = $this->shopify->getProducts();
 
-        // Mock ShopifyService for show
-        $this->mock(ShopifyService::class, function ($mock) use ($testId) {
-            $mock->shouldReceive('findProductById')
-                 ->with($testId)
-                 ->once()
-                 ->andReturn([
-                     'id' => $testId,
-                     'title' => 'Single Test Product',
-                     'body_html' => 'Single product description',
-                     'variants' => [['price' => 49.99]],
-                     'image' => ['src' => 'https://example.com/single.jpg'],
-                     'vendor' => 'Test Vendor',
-                 ]);
-        });
+        $normalized = array_map([$this, 'normalizeProduct'], $products);
 
-        $response = $this->get("/products/{$testId}");
+        return view('products.index', ['products' => $normalized]);
+    }
 
-        $response->assertStatus(200);
-        $response->assertSee('Single Test Product');
-        $response->assertSee('Single product description');
+    public function show($id)
+    {
+        $product = $this->shopify->findProductById($id);
+
+        if (!$product) {
+            abort(404);
+        }
+
+        $normalized = $this->normalizeProduct($product);
+
+        return view('products.show', ['product' => $normalized]);
+    }
+
+    private function normalizeProduct(array $product): array
+    {
+        return [
+            'id' => $product['id'] ?? null,
+            'title' => $product['title'] ?? 'Untitled',
+            'description' => $product['body_html'] ?? '',
+            'image' => $product['image']['src'] ?? null,
+            'price' => $product['variants'][0]['price'] ?? 0,
+            'variant_id' => $product['variants'][0]['id'] ?? null,
+            'vendor' => $product['vendor'] ?? 'Unknown',
+        ];
     }
 }
