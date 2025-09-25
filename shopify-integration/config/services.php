@@ -29,5 +29,10 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+    
+    'shopify' => [
+        'store_domain' => env('SHOPIFY_STORE_DOMAIN'),
+        'access_token' => env('SHOPIFY_ACCESS_TOKEN'),
+    ],
 
 ];

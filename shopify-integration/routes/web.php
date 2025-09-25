@@ -16,7 +16,7 @@ use Inertia\Inertia;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+     return redirect()->route('products.index');
 });
 
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');

@@ -1,10 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <title>ShopSync</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title inertia>{{ config('app.name', 'ShopSync') }}</title>
+    @routes {{-- if using Ziggy --}}
+    <link href="{{ mix('css/app.css') }}" rel="stylesheet">
+    <script src="{{ mix('js/app.js') }}" defer></script>
+    @inertiaHead
 </head>
 <body>
-    <h1>ShopSync App</h1>
-    <p>Welcome to the app view.</p>
+    @inertia
 </body>
 </html>
