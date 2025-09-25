@@ -2,18 +2,19 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
 export const useCartStore = defineStore('cart', () => {
-    const items = ref([]); // { id, title, price, quantity, image }
+    const items = ref([]); // { id, title, price, quantity, image, variant_id }
 
     function add(product) {
-        const exist = items.value.find(i => i.id === product.id);
+        const exist = items.value.find(i => i.variant_id === product.variant_id);
         if (exist) {
             exist.quantity += 1;
         } else {
             items.value.push({
-                id: product.id,
+                id: product.id, // product ID
                 title: product.title,
                 price: parseFloat(product.price) || 0,
                 image: product.image || null,
+                variant_id: product.variant_id, // unique identifier for the variant
                 quantity: 1,
             });
         }
@@ -24,7 +25,7 @@ export const useCartStore = defineStore('cart', () => {
     }
 
     function clear() {
-        items.value = [];
+        items.value = []; // Clear all items in the cart
     }
 
     const count = computed(() => items.value.reduce((s, p) => s + p.quantity, 0));

@@ -12,40 +12,34 @@ class ShopifyService
 
     public function __construct()
     {
-        $this->store = config('services.shopify.store_domain') ?? env('SHOPIFY_STORE_DOMAIN');
+        $this->store = config('services.shopify.store_domain') ?? env('SHOPIFY_STORE_DOMAIN'); // e.g., 'your-store.myshopify.com'
         $this->token = config('services.shopify.access_token') ?? env('SHOPIFY_ACCESS_TOKEN');
         $this->apiVersion = env('SHOPIFY_API_VERSION', '2025-01');
     }
 
     public function getProducts(): array
     {
-        if (!$this->store || !$this->token) {
+        if (!$this->store || !$this->token) { // Basic validation
             return [];
         }
 
-        $url = "https://{$this->store}/admin/api/{$this->apiVersion}/products.json?limit=50";
+        $url = "https://{$this->store}/admin/api/{$this->apiVersion}/products.json?limit=50"; // limit to 50 for demo purposes
 
         $resp = Http::withHeaders([
             'X-Shopify-Access-Token' => $this->token,
-            'Accept' => 'application/json',
+            'Accept' => 'application/json', // Ensure we accept JSON responses
         ])->get($url);
 
-        if ($resp->successful()) {
-            // return as array of products
-            return $resp->json('products', []);
-        }
-
-        return [];
+        return $resp->successful() ? $resp->json('products', []) : []; // Return empty array on failure
     }
 
     public function findProductById(int $id): ?array
     {
-        $products = $this->getProducts();
-        foreach ($products as $p) {
+        foreach ($this->getProducts() as $p) {
             if ((int)$p['id'] === $id) {
                 return $p;
             }
         }
-        return null;
+        return null; // Not found
     }
 }

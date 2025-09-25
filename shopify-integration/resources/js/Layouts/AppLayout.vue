@@ -1,47 +1,80 @@
 <template>
-  <div>
-    <header class="flex items-center justify-between p-4 bg-gray-100">
-      <div class="text-lg font-bold">ShopSync</div>
-      <div class="relative">
-        <button @click="show = !show" class="px-3 py-1 rounded bg-blue-600 text-white">
+  <div class="app-container">
+    <header class="header">
+      <div class="header-title">ShopSync</div>
+      <div class="cart-wrapper" ref="cartRef">
+        <button @click="show = !show" class="cart-button">
           🛒 Cart ({{ cart.count }})
         </button>
 
-        <div v-if="show" class="absolute right-0 mt-2 w-72 bg-white border shadow p-3 z-50">
-          <div v-if="cart.items.length === 0" class="text-gray-500">Cart is empty</div>
+        <div v-if="show" class="cart-dropdown">
+          <div v-if="cart.items.length === 0" class="cart-empty">Cart is empty</div>
           <div v-else>
-            <div v-for="(item, i) in cart.items" :key="i" class="flex justify-between mb-2">
-              <div>
-                <div class="font-semibold">{{ item.title }}</div>
-                <div class="text-sm text-gray-500">x {{ item.quantity }}</div>
+            <div v-for="(item, i) in cart.items" :key="i" class="cart-item">
+              <div class="cart-item-info">
+                <div class="cart-item-title">{{ item.title }}</div>
+                <div class="cart-item-qty">x {{ item.quantity }}</div>
               </div>
-              <div class="text-right">
+              <div class="cart-item-price">
                 <div>${{ (item.price * item.quantity).toFixed(2) }}</div>
-                <button @click="cart.remove(i)" class="text-red-500 text-sm mt-1">Remove</button>
+                <button @click="cart.remove(i)" class="cart-item-remove">Remove</button>
               </div>
             </div>
 
-            <div class="border-t pt-2 font-bold">Total: ${{ cart.total.toFixed(2) }}</div>
-            <button @click="cart.clear" class="mt-2 w-full bg-green-600 text-white py-1 rounded">Clear</button>
+            <div class="cart-total">Total: ${{ cart.total.toFixed(2) }}</div>
+
+            <div class="cart-actions">
+                <button @click="cart.clear" class="cart-clear">Clear</button>
+                <button @click="checkout" class="cart-checkout">Checkout</button>
+            </div>
           </div>
         </div>
       </div>
     </header>
 
-    <main class="p-4">
+    <main class="main-content">
       <slot />
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useCartStore } from '@/Stores/cart';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { useCartStore } from '../Stores/cart';
 
 const cart = useCartStore();
 const show = ref(false);
-</script>
+const cartRef = ref(null);
 
-<style scoped>
-/* minimal styles if you removed Tailwind */
-</style>
+const checkout = () => {
+  if (!cart.items.length) return alert('Cart is empty!');
+
+  const items = cart.items.map(i => ({
+  id: i.variant_id,
+  quantity: i.quantity
+}));
+
+  fetch('/api/checkout-url', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+  },
+  body: JSON.stringify({ items })
+})
+.then(res => res.json())
+.then(data => {
+  if (data.url) window.open(data.url, '_blank');
+  else alert('Failed to generate checkout link');
+})
+.catch(() => alert('Failed to generate checkout link'));
+};
+
+// Close dropdown when clicking outside
+const handleClickOutside = (e) => {
+  if (cartRef.value && !cartRef.value.contains(e.target)) show.value = false;
+};
+
+onMounted(() => document.addEventListener('click', handleClickOutside));
+onBeforeUnmount(() => document.removeEventListener('click', handleClickOutside));
+</script>
