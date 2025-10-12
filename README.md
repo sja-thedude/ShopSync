@@ -1,6 +1,14 @@
 # ShopSync
 Syncing products between Shopify and your app, with a shopping cart and checkout integration.
 
+# Screenshots
+
+![ss1](media/ss1.png)
+![ss2](media/ss2.png)
+![ss3](media/ss3.png)
+![ss4](media/ss4.png)
+![ss5](media/ss5.png)
+
 ## Features
 	•	Display products from Shopify.
 	•	Add products to cart with variant selection.
